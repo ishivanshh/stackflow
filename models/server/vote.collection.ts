@@ -115,5 +115,5 @@ export default async function createVoteTable() {
     //     ),
     // ]);
 
-    console.log("Vote indexes created");
+    // console.log("Vote indexes created");
 }

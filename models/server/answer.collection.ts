@@ -73,6 +73,6 @@ export default async function createAnswerTable() {
     //     ),
     // ]);
 
-    console.log("Answer indexes created");
+    // console.log("Answer indexes created");
 }
 

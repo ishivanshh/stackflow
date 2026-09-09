@@ -7,7 +7,14 @@ import createVoteTable from "./vote.collection";
 
 import { tablesDB } from "./config";
 
+let setupAttempted = false;
+
 export default async function getOrCreateDb() {
+    if (setupAttempted) {
+        return tablesDB;
+    }
+
+    setupAttempted = true;
 
     try {
 
@@ -16,7 +23,7 @@ export default async function getOrCreateDb() {
 
         console.log("Database connected");
 
-    } catch (error) {
+    } catch {
 
         try {
 
@@ -38,12 +45,19 @@ export default async function getOrCreateDb() {
 
             console.log("All tables created");
 
-        } catch (error) {
+        } catch (error: unknown) {
+            const errorType =
+                typeof error === "object" && error !== null && "type" in error
+                    ? String(error.type)
+                    : "";
 
-            console.log(
-                "Error creating database:",
-                error
-            );
+            if (errorType === "additional_resource_not_allowed") {
+                console.warn(
+                    `Database "${db}" is not available and this Appwrite project has reached its database limit. Create or select an existing database, then update models/name.ts.`
+                );
+            } else {
+                console.error("Error creating database:", error);
+            }
         }
     }
 

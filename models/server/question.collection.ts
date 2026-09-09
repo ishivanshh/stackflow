@@ -97,5 +97,5 @@ export default async function createQuestionTable() {
     //     ),
     // ]);
 
-    console.log("Question indexes created");
+    // console.log("Question indexes created");
 }
