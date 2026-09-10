@@ -35,16 +35,6 @@ export default async function getOrCreateDb() {
 
             console.log("Database created");
 
-            // Create all tables
-            await Promise.all([
-                createQuestionTable(),
-                createAnswerTable(),
-                createCommentTable(),
-                createVoteTable(),
-            ]);
-
-            console.log("All tables created");
-
         } catch (error: unknown) {
             const errorType =
                 typeof error === "object" && error !== null && "type" in error
@@ -59,6 +49,19 @@ export default async function getOrCreateDb() {
                 console.error("Error creating database:", error);
             }
         }
+    }
+
+    try {
+        await Promise.all([
+            createQuestionTable(),
+            createAnswerTable(),
+            createCommentTable(),
+            createVoteTable(),
+        ]);
+
+        console.log("All tables connected");
+    } catch (error) {
+        console.error("Error setting up tables:", error);
     }
 
     return tablesDB;

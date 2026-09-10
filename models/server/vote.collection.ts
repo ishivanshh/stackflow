@@ -5,115 +5,84 @@ import { tablesDB } from "./config";
 
 export default async function createVoteTable() {
 
-    // Create table
-    await tablesDB.createTable(
-        db,
-        voteCollection,
-        voteCollection,
-        [
-            Permission.read("any"),
-            Permission.create("users"),
-            Permission.update("users"),
-            Permission.delete("users"),
-        ]
-    );
+    let tableCreated = false;
+
+    try {
+        await tablesDB.getTable(db, voteCollection);
+    } catch (error: unknown) {
+        if (
+            typeof error !== "object" ||
+            error === null ||
+            !("code" in error) ||
+            error.code !== 404
+        ) {
+            throw error;
+        }
+
+        await tablesDB.createTable(
+            db,
+            voteCollection,
+            voteCollection,
+            [
+                Permission.read("any"),
+                Permission.create("users"),
+                Permission.update("users"),
+                Permission.delete("users"),
+            ]
+        );
+
+        tableCreated = true;
+    }
+
+    if (!tableCreated) {
+        console.log("Vote table already exists");
+        return;
+    }
 
     console.log("Vote table created");
 
     // Create columns
     await Promise.all([
 
-        // User who voted
+        // Type of entity being voted on
+        // "question" or "answer"
         tablesDB.createVarcharColumn(
             db,
             voteCollection,
-            "userId",
+            "type",
+            20,
+            true
+        ),
+
+        // ID of the question or answer
+        tablesDB.createVarcharColumn(
+            db,
+            voteCollection,
+            "typeId",
             50,
             true
         ),
 
-        // Question being voted on
+        // User who voted
         tablesDB.createVarcharColumn(
             db,
             voteCollection,
-            "questionId",
+            "votedById",
             50,
-            false
+            true
         ),
 
-        // Answer being voted on
+        // "upvoted" or "downvoted"
         tablesDB.createVarcharColumn(
             db,
             voteCollection,
-            "answerId",
-            50,
-            false
-        ),
-
-        // 1 = upvote
-        // -1 = downvote
-        tablesDB.createIntegerColumn(
-            db,
-            voteCollection,
-            "value",
-            true,
-            -1,
-            1
+            "voteStatus",
+            20,
+            true
         ),
     ]);
 
     console.log("Vote columns created");
 
     // Create indexes
-    // await Promise.all([
-
-    //     // Find votes made by a user
-    //     tablesDB.createIndex(
-    //         db,
-    //         voteCollection,
-    //         "userId_index",
-    //         "key",
-    //         ["userId"]
-    //     ),
-
-    //     // Find votes for a question
-    //     tablesDB.createIndex(
-    //         db,
-    //         voteCollection,
-    //         "questionId_index",
-    //         "key",
-    //         ["questionId"]
-    //     ),
-
-    //     // Find votes for an answer
-    //     tablesDB.createIndex(
-    //         db,
-    //         voteCollection,
-    //         "answerId_index",
-    //         "key",
-    //         ["answerId"]
-    //     ),
-
-    //     // Useful for checking whether a user
-    //     // has already voted on a question
-    //     tablesDB.createIndex(
-    //         db,
-    //         voteCollection,
-    //         "user_question_index",
-    //         "key",
-    //         ["userId", "questionId"]
-    //     ),
-
-    //     // Useful for checking whether a user
-    //     // has already voted on an answer
-    //     tablesDB.createIndex(
-    //         db,
-    //         voteCollection,
-    //         "user_answer_index",
-    //         "key",
-    //         ["userId", "answerId"]
-    //     ),
-    // ]);
-
-    // console.log("Vote indexes created");
 }

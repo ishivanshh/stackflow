@@ -13,9 +13,14 @@ export default async function getOrCreateCommentTable() {
 
         console.log("Comment table already exists");
 
-    } catch (error: any) {
+    } catch (error: unknown) {
 
-        if (error.code !== 404) {
+        if (
+            typeof error !== "object" ||
+            error === null ||
+            !("code" in error) ||
+            error.code !== 404
+        ) {
             throw error;
         }
 

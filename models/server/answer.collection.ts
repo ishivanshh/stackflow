@@ -4,18 +4,39 @@ import { tablesDB } from "./config";
 
 export default async function createAnswerTable() {
 
-    // Create table
-    await tablesDB.createTable(
-        db,
-        answerCollection,
-        answerCollection,
-        [
-            Permission.read("any"),
-            Permission.create("users"),
-            Permission.update("users"),
-            Permission.delete("users"),
-        ]
-    );
+    let tableCreated = false;
+
+    try {
+        await tablesDB.getTable(db, answerCollection);
+    } catch (error: unknown) {
+        if (
+            typeof error !== "object" ||
+            error === null ||
+            !("code" in error) ||
+            error.code !== 404
+        ) {
+            throw error;
+        }
+
+        await tablesDB.createTable(
+            db,
+            answerCollection,
+            answerCollection,
+            [
+                Permission.read("any"),
+                Permission.create("users"),
+                Permission.update("users"),
+                Permission.delete("users"),
+            ]
+        );
+
+        tableCreated = true;
+    }
+
+    if (!tableCreated) {
+        console.log("Answer table already exists");
+        return;
+    }
 
     console.log("Answer table created");
 
