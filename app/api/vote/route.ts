@@ -1,8 +1,10 @@
 import { Query } from "node-appwrite";
 import { NextRequest, NextResponse } from "next/server";
 
-import { db, voteCollection } from "@/models/name";
+import { db, answerCollection, questionCollection, voteCollection } from "@/models/name";
 import { tablesDB } from "@/models/server/config";
+
+const REPUTATION_CHANGE = 10;
 
 export async function POST(request: NextRequest) {
 
@@ -28,6 +30,45 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Validate vote status
+        if (!["upvoted", "downvoted"].includes(voteStatus)) {
+            return NextResponse.json(
+                {
+                    error: "voteStatus must be either upvoted or downvoted"
+                },
+                {
+                    status: 400
+                }
+            );
+        }
+
+        // Validate type
+        if (!["question", "answer"].includes(type)) {
+            return NextResponse.json(
+                {
+                    error: "type must be either question or answer"
+                },
+                {
+                    status: 400
+                }
+            );
+        }
+
+        // Select the collection based on the type
+        const targetCollection =
+            type === "question"
+                ? questionCollection
+                : answerCollection;
+
+        // Find the question or answer
+        const targetResponse = await tablesDB.getRow(
+            db,
+            targetCollection,
+            typeId
+        );
+
+        const target = targetResponse as any;
+
         // Find existing vote
         const response = await tablesDB.listRows(
             db,
@@ -39,47 +80,114 @@ export async function POST(request: NextRequest) {
             ]
         );
 
-        // User has already voted
-        if (response.rows.length > 0) {
+        const existingVote = response.rows[0] as any;
 
-            const existingVote = response.rows[0];
+        // Same vote means remove the vote and reverse its reputation effect
+        if (existingVote && existingVote.voteStatus === voteStatus) {
 
-            // Same vote → remove vote
-            if (existingVote.voteStatus === voteStatus) {
+            const reputationChange =
+                voteStatus === "upvoted"
+                    ? -REPUTATION_CHANGE
+                    : REPUTATION_CHANGE;
 
-                await tablesDB.deleteRow(
-                    db,
-                    voteCollection,
-                    existingVote.$id
-                );
-
-                return NextResponse.json(
-                    {
-                        message: "Vote removed"
-                    },
-                    {
-                        status: 200
-                    }
-                );
-            }
-
-            // Different vote → change vote
-            const updatedVote = await tablesDB.updateRow(
+            await tablesDB.updateRow(
                 db,
-                voteCollection,
-                existingVote.$id,
+                targetCollection,
+                typeId,
                 {
-                    voteStatus: voteStatus
+                    reputation: Math.max(
+                        0,
+                        (target.reputation || 0) + reputationChange
+                    )
                 }
             );
 
+            await tablesDB.deleteRow(
+                db,
+                voteCollection,
+                existingVote.$id
+            );
+
             return NextResponse.json(
-                updatedVote,
+                {
+                    message: "Vote removed",
+                    reputation: Math.max(
+                        0,
+                        (target.reputation || 0) + reputationChange
+                    )
+                },
                 {
                     status: 200
                 }
             );
         }
+
+        // Different vote means change the vote and reverse the old effect
+        if (existingVote) {
+
+            const oldReputationChange =
+                existingVote.voteStatus === "upvoted"
+                    ? -REPUTATION_CHANGE
+                    : REPUTATION_CHANGE;
+
+            const newReputationChange =
+                voteStatus === "upvoted"
+                    ? REPUTATION_CHANGE
+                    : -REPUTATION_CHANGE;
+
+            const reputationChange =
+                oldReputationChange + newReputationChange;
+
+            const updatedTarget = await tablesDB.updateRow(
+                db,
+                targetCollection,
+                typeId,
+                {
+                    reputation: Math.max(
+                        0,
+                        (target.reputation || 0) + reputationChange
+                    )
+                }
+            );
+
+            const updatedVote = await tablesDB.updateRow(
+                db,
+                voteCollection,
+                existingVote.$id,
+                {
+                    voteStatus
+                }
+            );
+
+            return NextResponse.json(
+                {
+                    vote: updatedVote,
+                    reputation: (updatedTarget as any).reputation
+                },
+                {
+                    status: 200
+                }
+            );
+        }
+
+        // New upvote increases reputation
+        // New downvote decreases reputation
+        const reputationChange =
+            voteStatus === "upvoted"
+                ? REPUTATION_CHANGE
+                : -REPUTATION_CHANGE;
+
+        const updatedTarget = await tablesDB.updateRow(
+            db,
+            targetCollection,
+            typeId,
+            {
+                reputation: Math.max(
+                    0,
+                    (target.reputation || 0) + reputationChange
+                )
+            }
+        );
 
         // Create new vote
         const newVote = await tablesDB.createRow(
@@ -95,7 +203,10 @@ export async function POST(request: NextRequest) {
         );
 
         return NextResponse.json(
-            newVote,
+            {
+                vote: newVote,
+                reputation: (updatedTarget as any).reputation
+            },
             {
                 status: 201
             }
