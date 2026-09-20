@@ -105,7 +105,7 @@ export const useAuthStore = create<IAuthStore>()(
 
         async logout(){
             try {
-                await account.deleteSession()
+                await account.deleteSession("current");
                 set({ session : null , jwt : null , user : null })
                 
             } catch (error) {
