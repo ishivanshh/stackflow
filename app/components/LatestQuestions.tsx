@@ -7,7 +7,6 @@ import React from "react";
 
 const LatestQuestions = async () => {
     const questions = await tablesDB.listRows(db, questionCollection, [
-        Query.limit(5),
         Query.orderDesc("$createdAt"),
     ]);
     console.log("Fetched Questions:", questions);

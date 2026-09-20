@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { BorderBeam } from "./magicui/border-beam";
+import { BorderBeam } from "@/components/ui/border-beam";
 import Link from "next/link";
 import { Models } from "appwrite";
 import slugify from "@/utils/slugify";
@@ -51,36 +51,17 @@ const QuestionCard = ({
     ques: QuestionRow;
 }) => {
 
-    const [height, setHeight] = React.useState(0);
-
-    const ref = React.useRef<HTMLDivElement>(null);
-
-
-    // -----------------------------------------------------
-    // Calculate card height for BorderBeam
-    // -----------------------------------------------------
-
-    React.useEffect(() => {
-
-        if (ref.current) {
-            setHeight(ref.current.clientHeight);
-        }
-
-    }, []);
-
-
     // -----------------------------------------------------
     // Render
     // -----------------------------------------------------
 
     return (
         <div
-            ref={ref}
             className="relative flex flex-col gap-4 overflow-hidden rounded-xl border border-white/20 bg-white/5 p-4 duration-200 hover:bg-white/10 sm:flex-row"
         >
 
             <BorderBeam
-                size={height}
+                size={48}
                 duration={12}
                 delay={9}
             />

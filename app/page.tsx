@@ -1,452 +1,306 @@
-'use client';
 
-import { Inter, Space_Grotesk } from "next/font/google";
-import Link from "next/link";
+import { Globe } from "@/components/ui/globe";
+import LatestQuestions from "./components/LatestQuestions";
+import Footer from "./components/Footer";
+import { AnimatedList } from "@/components/ui/animated-list";
+import { cn } from "@/lib/utils";
+import {
+  AnimatedSpan,
+  Terminal,
+  TypingAnimation,
+} from "@/components/ui/terminal";
+import {
+  ScrollVelocityContainer,
+  ScrollVelocityRow,
+} from "@/components/ui/scroll-based-velocity";
+import { MorphingText } from "@/components/ui/morphing-text"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", weight: ["400", "500", "600"] });
+const joinedUsers = [
+  { name: "Shivansh Saxena", time: "just now", icon: "👤", color: "#00C9A7" },
+  { name: "Rohit", time: "2m ago", icon: "✨", color: "#FFB800" },
+  { name: "Sanyam Garg", time: "5m ago", icon: "🚀", color: "#FF3D71" },
+  { name: "Priya Sharma", time: "8m ago", icon: "💬", color: "#1E86FF" },
+];
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  weight: ["500", "600", "700"],
-});
-
-export default function Page() {
-  return (
-    <div className={`${inter.variable} ${spaceGrotesk.variable}`}>
-      <nav className="nav">
-        <Link className="brand" href="/">
-          <span className="brand-dot" />
-          StackFlow
-        </Link>
-        <div className="nav-actions">
-          <Link className="btn btn-ghost" href="/login">
-            Log in
-          </Link>
-          <Link className="btn btn-solid" href="/register">
-            Sign up
-          </Link>
-        </div>
-      </nav>
-
-      <section className="hero">
-        <div>
-          <div className="eyebrow-line">
-            <span className="rule" />
-            a place to get unstuck
-          </div>
-          <h1>
-            Ask a question.
-            <br />
-            Get a real <em>answer.</em>
-          </h1>
-          <p className="lede">
-            StackFlow is where developers post the problem they&apos;re stuck on and get answers from
-            people who&apos;ve solved it before — no forums to dig through, no threads to lose track of.
-          </p>
-          <div className="hero-cta">
-            <Link className="btn btn-solid btn-lg" href="/questions/ask">
-              Ask a question
-            </Link>
-            <Link className="btn btn-ghost btn-lg" href="/questions">
-              Browse questions
-            </Link>
-          </div>
-        </div>
-
-        <div className="stack">
-          <Link className="qcard" href="/questions?search=useEffect">
-            <p className="qcard-title">Why does useEffect run twice in React 18 dev mode?</p>
-            <div className="qcard-meta">
-              <span className="qcard-tag">react</span>
-              <span className="qcard-answered">
-                <span className="ring" />
-                Answered
-              </span>
-            </div>
-          </Link>
-          <Link className="qcard" href="/questions?search=JSONB">
-            <p className="qcard-title">Best way to index a JSONB column in PostgreSQL?</p>
-            <div className="qcard-meta">
-              <span className="qcard-tag">postgresql</span>
-              <span className="qcard-answered">
-                <span className="ring" />
-                Answered
-              </span>
-            </div>
-          </Link>
-          <Link className="qcard" href="/questions?search=Docker">
-            <p className="qcard-title">Docker container can&apos;t reach host on Mac — fix?</p>
-            <div className="qcard-meta">
-              <span className="qcard-tag">docker</span>
-              <span style={{ color: "var(--text-dim)", fontWeight: 500 }}>3 answers</span>
-            </div>
-          </Link>
-        </div>
-      </section>
-
-      <section className="guidelines">
-        <h2>Before you post</h2>
-        <p className="sub">
-          A few ground rules keep answers findable and worth trusting. They apply the same way to
-          every question and every answer.
-        </p>
-
-        <div className="rules">
-          {[
-            ["01", "Search first", "Check if your question has already been answered before posting a duplicate."],
-            ["02", "Be specific", "Include what you tried, the error you got, and the environment it happened in."],
-            ["03", "Answer the question asked", "Solve the actual problem, not the problem you assume they meant."],
-            ["04", "Show your reasoning", "A working snippet with no explanation helps less than you'd think."],
-            ["05", "No personal attacks", "Critique code and ideas, never the person who posted them."],
-            ["06", "Mark it resolved", "If an answer fixed it, accept it so the next person finds it faster."],
-          ].map(([mark, title, body]) => (
-            <div className="rule" key={mark}>
-              <span className="rule-mark">{mark}</span>
-              <div className="rule-body">
-                <h3>{title}</h3>
-                <p>{body}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <style jsx global>{`
-        :root {
-          --ink: #10161d;
-          --surface: #161e27;
-          --surface-2: #1d2731;
-          --line: #2a3540;
-          --text: #e7ebee;
-          --text-dim: #93a1ac;
-          --amber: #f2b705;
-          --teal: #49c9b8;
-          padding-top: env(safe-area-inset-top, 0px);
-          padding-bottom: env(safe-area-inset-bottom, 0px);
-        }
-        * {
-          box-sizing: border-box;
-        }
-        html {
-          scroll-padding-top: env(safe-area-inset-top, 0px);
-        }
-        html,
-        body {
-          height: 100%;
-        }
-        body {
-          margin: 0;
-          background: var(--ink);
-          color: var(--text);
-          font-family: var(--font-inter), -apple-system, sans-serif;
-          -webkit-font-smoothing: antialiased;
-          overflow-x: hidden;
-        }
-        h1,
-        h2,
-        .brand,
-        .btn,
-        .qcard-tag {
-          font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
-        }
-
-        .nav {
-          position: sticky;
-          top: 0;
-          top: env(safe-area-inset-top, 0px);
-          z-index: 20;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 18px 6vw;
-          background: rgba(16, 22, 29, 0.85);
-          backdrop-filter: blur(10px);
-          border-bottom: 1px solid var(--line);
-        }
-        .brand {
-          font-weight: 700;
-          font-size: 1.25rem;
-          letter-spacing: -0.01em;
-          color: var(--text);
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          text-decoration: none;
-        }
-        .brand-dot {
-          width: 9px;
-          height: 9px;
-          border-radius: 2px;
-          background: var(--amber);
-          display: inline-block;
-          transform: rotate(45deg);
-        }
-        .nav-actions {
-          display: flex;
-          gap: 10px;
-          align-items: center;
-        }
-        .btn {
-          font-size: 0.92rem;
-          font-weight: 600;
-          border-radius: 7px;
-          padding: 9px 18px;
-          cursor: pointer;
-          border: 1px solid transparent;
-          transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
-        }
-        .btn:active {
-          transform: translateY(1px);
-        }
-        .btn-ghost {
-          background: transparent;
-          color: var(--text);
-          border-color: var(--line);
-        }
-        .btn-ghost:hover {
-          border-color: var(--text-dim);
-        }
-        .btn-solid {
-          background: var(--amber);
-          color: #1a1400;
-        }
-        .btn-solid:hover {
-          background: #ffc61a;
-        }
-
-        .hero {
-          display: grid;
-          grid-template-columns: 1.05fr 0.95fr;
-          gap: 4vw;
-          align-items: center;
-          max-width: 1180px;
-          margin: 0 auto;
-          padding: 8vh 6vw 7vh;
-        }
-        .eyebrow-line {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          color: var(--teal);
-          font-size: 0.85rem;
-          margin-bottom: 18px;
-          opacity: 0;
-          animation: rise 0.6s ease forwards 0.05s;
-        }
-        .eyebrow-line .rule {
-          width: 28px;
-          height: 1px;
-          background: var(--teal);
-          display: inline-block;
-        }
-        h1 {
-          font-size: clamp(2.3rem, 4.4vw, 3.4rem);
-          line-height: 1.08;
-          font-weight: 700;
-          letter-spacing: -0.02em;
-          margin: 0 0 20px;
-          opacity: 0;
-          animation: rise 0.7s ease forwards 0.15s;
-        }
-        h1 em {
-          font-style: normal;
-          color: var(--amber);
-        }
-        .hero p.lede {
-          font-size: 1.08rem;
-          line-height: 1.65;
-          color: var(--text-dim);
-          max-width: 46ch;
-          margin: 0 0 34px;
-          opacity: 0;
-          animation: rise 0.7s ease forwards 0.28s;
-        }
-        .hero-cta {
-          display: flex;
-          gap: 14px;
-          flex-wrap: wrap;
-          opacity: 0;
-          animation: rise 0.7s ease forwards 0.4s;
-        }
-        .btn-lg {
-          padding: 13px 24px;
-          font-size: 0.98rem;
-        }
-        @keyframes rise {
-          from {
-            opacity: 0;
-            transform: translateY(14px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .stack {
-          position: relative;
-          height: 360px;
-        }
-        .qcard {
-          position: absolute;
-          left: 0;
-          right: 0;
-          background: var(--surface);
-          border: 1px solid var(--line);
-          border-radius: 10px;
-          padding: 16px 18px;
-          box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.6);
-          opacity: 0;
-          transform: translateY(24px);
-          animation: cardIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-          text-decoration: none;
-          transition: border-color 0.15s ease, transform 0.15s ease;
-        }
-        .qcard:hover {
-          border-color: var(--teal);
-          transform: translateY(-3px);
-        }
-        .qcard:nth-child(1) {
-          top: 0;
-          z-index: 3;
-          animation-delay: 0.5s;
-        }
-        .qcard:nth-child(2) {
-          top: 118px;
-          z-index: 2;
-          animation-delay: 0.65s;
-        }
-        .qcard:nth-child(3) {
-          top: 236px;
-          z-index: 1;
-          animation-delay: 0.8s;
-        }
-        @keyframes cardIn {
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .qcard-title {
-          font-size: 0.98rem;
-          font-weight: 600;
-          margin: 0 0 8px;
-          color: var(--text);
-        }
-        .qcard-meta {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 0.8rem;
-          color: var(--text-dim);
-        }
-        .qcard-answered {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          color: var(--teal);
-          font-weight: 600;
-        }
-        .qcard-answered .ring {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: var(--teal);
-          box-shadow: 0 0 0 3px rgba(73, 201, 184, 0.18);
-        }
-        .qcard-tag {
-          background: var(--surface-2);
-          border: 1px solid var(--line);
-          color: var(--text-dim);
-          font-size: 0.72rem;
-          padding: 2px 8px;
-          border-radius: 5px;
-        }
-
-        .guidelines {
-          max-width: 1180px;
-          margin: 0 auto;
-          padding: 4vh 6vw 10vh;
-          border-top: 1px solid var(--line);
-        }
-        .guidelines h2 {
-          font-size: 1.6rem;
-          font-weight: 600;
-          margin: 40px 0 8px;
-          letter-spacing: -0.01em;
-        }
-        .guidelines .sub {
-          color: var(--text-dim);
-          margin: 0 0 34px;
-          max-width: 60ch;
-          font-size: 0.98rem;
-        }
-        .rules {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-          gap: 0;
-          border-top: 1px solid var(--line);
-        }
-        .rule {
-          padding: 22px 0;
-          border-bottom: 1px solid var(--line);
-          display: flex;
-          gap: 16px;
-        }
-        .rules .rule:nth-child(odd) {
-          padding-right: 24px;
-          border-right: 1px solid var(--line);
-        }
-        .rule-mark {
-          font-family: var(--font-space-grotesk), sans-serif;
-          font-size: 0.85rem;
-          color: var(--amber);
-          padding-top: 2px;
-          flex-shrink: 0;
-          width: 22px;
-        }
-        .rule-body h3 {
-          margin: 0 0 6px;
-          font-size: 1rem;
-          font-weight: 600;
-          color: var(--text);
-        }
-        .rule-body p {
-          margin: 0;
-          font-size: 0.92rem;
-          line-height: 1.55;
-          color: var(--text-dim);
-        }
-
-        @media (max-width: 860px) {
-          .hero {
-            grid-template-columns: 1fr;
-            padding-top: 5vh;
-          }
-          .stack {
-            height: 320px;
-            order: -1;
-            margin-bottom: 6px;
-          }
-          .rules .rule:nth-child(odd) {
-            border-right: none;
-            padding-right: 0;
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .eyebrow-line,
-          h1,
-          .hero p.lede,
-          .hero-cta,
-          .qcard {
-            animation: none !important;
-            opacity: 1 !important;
-            transform: none !important;
-          }
-        }
-      `}</style>
+const JoinedUser = ({
+  name,
+  time,
+  icon,
+  color,
+}: (typeof joinedUsers)[number]) => (
+  <figure
+    className={cn(
+      "relative mx-auto w-full max-w-[400px] overflow-hidden rounded-2xl p-4",
+      "bg-white [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
+      "transition-all duration-200 ease-in-out hover:scale-[103%]",
+      "dark:bg-transparent dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset] dark:backdrop-blur-md dark:[border:1px_solid_rgba(255,255,255,.1)]"
+    )}
+  >
+    <div className="flex items-center gap-3">
+      <div
+        className="flex size-10 shrink-0 items-center justify-center rounded-2xl"
+        style={{ backgroundColor: color }}
+      >
+        <span className="text-lg">{icon}</span>
+      </div>
+      <div className="min-w-0">
+        <figcaption className="flex items-center gap-1 dark:text-white">
+          <span className="truncate font-medium">{name}</span>
+          <span className="text-gray-500">joined</span>
+        </figcaption>
+        <p className="text-sm text-muted-foreground">{time}</p>
+      </div>
     </div>
+  </figure>
+);
+
+export default function Home() {
+  return (
+    <main className="w-full overflow-hidden">
+
+      {/* =====================================================
+          HERO SECTION
+      ===================================================== */}
+
+      <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-transparent">
+
+      
+        {/* GLOBE */}
+
+        <Globe
+          className="
+            absolute
+            top-1/2
+            left-1/2
+            z-0
+            w-[min(92vw,900px)]
+            !max-w-[900px]
+            -translate-x-1/2
+            -translate-y-1/2
+          "
+        />
+
+
+        {/* HERO OVERLAY */}
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            inset-0
+            z-20
+            bg-[radial-gradient(circle_at_50%_100%,rgba(0,0,0,0.25),transparent_60%)]
+          "
+        />
+
+
+        {/* Bottom fade */}
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            bottom-0
+            left-0
+            z-30
+            h-40
+            w-full
+            bg-gradient-to-t
+            from-background
+            to-transparent
+          "
+        />
+
+      </section>
+
+
+      {/* =====================================================
+          SCROLL VELOCITY SECTION
+      ===================================================== */}
+
+      <section className="relative flex w-full items-center justify-center overflow-hidden py-20">
+
+        <ScrollVelocityContainer
+          className="
+            w-full
+            text-4xl
+            font-bold
+            tracking-[-0.02em]
+            md:text-7xl
+            md:leading-20
+          "
+        >
+
+          <ScrollVelocityRow
+            baseVelocity={20}
+            direction={1}
+          >
+            BUILD • CREATE • DEPLOY • INNOVATE •
+          </ScrollVelocityRow>
+
+
+          <ScrollVelocityRow
+            baseVelocity={20}
+            direction={-1}
+          >
+            QUESTION • LIKE • COMMENT • ANSWER •
+          </ScrollVelocityRow>
+
+        </ScrollVelocityContainer>
+
+
+        {/* Left fade */}
+
+        <div
+          className="
+            from-background
+            pointer-events-none
+            absolute
+            inset-y-0
+            left-0
+            z-10
+            w-1/4
+            bg-gradient-to-r
+          "
+        />
+
+
+        {/* Right fade */}
+
+        <div
+          className="
+            from-background
+            pointer-events-none
+            absolute
+            inset-y-0
+            right-0
+            z-10
+            w-1/4
+            bg-gradient-to-l
+          "
+        />
+
+      </section>
+
+
+      {/* =====================================================
+          ROTATING TECHNOLOGY ICONS
+      ===================================================== */}
+
+      <section className="relative flex min-h-[70vh] w-full items-center justify-center overflow-hidden">
+
+        {/* Background glow */}
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            inset-0
+            bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_55%)]
+          "
+        />
+
+
+        {/* Heading */}
+
+          <div className="absolute inset-x-0 top-12 z-20 flex justify-center text-center">
+
+          <MorphingText
+        className="text-[48pt]"
+  texts={[
+    "Hello",
+    "नमस्ते",       // Hindi
+    "নমস্কার",      // Bengali
+    "নমস্কাৰ",      // Assamese
+    "નમસ્તે",       // Gujarati
+    "ನಮಸ್ಕಾರ",      // Kannada
+    "നമസ്കാരം",      // Malayalam
+    "ନମସ୍କାର",      // Odia
+    "నమస్కారం",     // Telugu
+    "நமஸ்காரம்",    // Tamil
+    "ਸਤ ਸ੍ਰੀ ਅਕਾਲ", // Punjabi
+    "नमस्कार",      // Marathi
+    "नमस्कार",      // Nepali
+  ]}
+/>
+
+        </div>
+
+
+        <div className="relative z-10 flex w-full max-w-3xl items-center justify-center px-4 pt-24">
+          <Terminal className="w-full">
+            <TypingAnimation>&gt; pnpm dlx shadcn@latest init</TypingAnimation>
+
+            <AnimatedSpan className="text-green-500">
+              ✔ Preflight checks.
+            </AnimatedSpan>
+            <AnimatedSpan className="text-green-500">
+              ✔ Verifying framework. Found Next.js.
+            </AnimatedSpan>
+            <AnimatedSpan className="text-green-500">
+              ✔ Validating Tailwind CSS.
+            </AnimatedSpan>
+            <AnimatedSpan className="text-green-500">
+              ✔ Validating import alias.
+            </AnimatedSpan>
+            <AnimatedSpan className="text-green-500">
+              ✔ Checking registry.
+            </AnimatedSpan>
+            <AnimatedSpan className="text-green-500">
+              ✔ Installing dependencies.
+            </AnimatedSpan>
+            <AnimatedSpan className="text-blue-500">
+              <span>ℹ Updated 1 file:</span>
+              <span className="pl-2">- app/page.tsx</span>
+            </AnimatedSpan>
+            <TypingAnimation className="text-muted-foreground">
+              Success! Project initialization completed.
+            </TypingAnimation>
+            <TypingAnimation className="text-muted-foreground">
+              You may now add components.
+            </TypingAnimation>
+          </Terminal>
+        </div>
+
+      </section>
+
+      <section className="container mx-auto w-full px-4 py-20">
+        <div className="mb-10">
+          <div>
+            <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+              Community
+            </p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight sm:text-5xl">
+              Questions
+            </h2>
+          </div>
+        </div>
+        <div className="grid gap-10 lg:grid-cols-[2fr_1fr] lg:items-start">
+          <div className="min-w-0">
+            <LatestQuestions />
+          </div>
+
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-6">
+            <div className="mb-4">
+              <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
+                Growing together
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold">Users joining Codeflow</h3>
+            </div>
+            <div className="relative h-[500px] overflow-hidden">
+              <AnimatedList className="gap-4">
+                {joinedUsers.map((user, index) => (
+                  <JoinedUser {...user} key={`${user.name}-${index}`} />
+                ))}
+              </AnimatedList>
+              <div className="from-background pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+
+    </main>
   );
 }
