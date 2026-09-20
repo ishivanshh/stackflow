@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/Auth";
 
 export const FloatingNav = ({
@@ -19,6 +20,7 @@ export const FloatingNav = ({
     const { scrollYProgress, scrollY } = useScroll();
 
     const { session, logout } = useAuthStore();
+    const router = useRouter();
 
     const [visible, setVisible] = useState(true);
 
@@ -76,7 +78,10 @@ export const FloatingNav = ({
                 ))}
                 {session ? (
                     <button
-                        onClick={logout}
+                        onClick={async () => {
+                            await logout();
+                            router.replace("/login");
+                        }}
                         className="relative rounded-full border border-neutral-200 px-4 py-2 text-sm font-medium text-black dark:border-white/[0.2] dark:text-white"
                     >
                         <span>Logout</span>

@@ -206,7 +206,6 @@ export default function Home() {
           <div className="absolute inset-x-0 top-12 z-20 flex justify-center text-center">
 
           <MorphingText
-        className="text-[48pt]"
   texts={[
     "Hello",
     "नमस्ते",       // Hindi
@@ -229,22 +228,22 @@ export default function Home() {
 
         <div className="relative z-10 flex w-full max-w-3xl items-center justify-center px-4 pt-24">
           <Terminal className="w-full">
-            <TypingAnimation>&gt; pnpm dlx shadcn@latest init</TypingAnimation>
+            <TypingAnimation>&gt; npm run dev @codeflow</TypingAnimation>
 
             <AnimatedSpan className="text-green-500">
-              ✔ Preflight checks.
+              ✔ Post Your Doubts. Get Answers. Build Together. 
             </AnimatedSpan>
             <AnimatedSpan className="text-green-500">
-              ✔ Verifying framework. Found Next.js.
+              ✔ Contribute to the community. Share your knowledge.
             </AnimatedSpan>
             <AnimatedSpan className="text-green-500">
-              ✔ Validating Tailwind CSS.
+              ✔ Give Vote to the best answers. Help others learn.
             </AnimatedSpan>
             <AnimatedSpan className="text-green-500">
-              ✔ Validating import alias.
+              ✔ Also  keep checking our latest features and updates
             </AnimatedSpan>
             <AnimatedSpan className="text-green-500">
-              ✔ Checking registry.
+              ✔ Your are good to go. Happy Contributing!
             </AnimatedSpan>
             <AnimatedSpan className="text-green-500">
               ✔ Installing dependencies.
@@ -254,10 +253,10 @@ export default function Home() {
               <span className="pl-2">- app/page.tsx</span>
             </AnimatedSpan>
             <TypingAnimation className="text-muted-foreground">
-              Success! Project initialization completed.
+              Success! Check out the latest questions below.
             </TypingAnimation>
             <TypingAnimation className="text-muted-foreground">
-              You may now add components.
+              Fill Below to contribute in this project. Your contribution will be appreciated.
             </TypingAnimation>
           </Terminal>
         </div>
