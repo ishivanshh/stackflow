@@ -13,11 +13,12 @@ import {
     commentCollection,
     questionAttachmentBucket,
 } from "@/models/name";
-import { databases, users } from "@/models/server/config";
+import { tablesDB, users } from "@/models/server/config";
 import { storage } from "@/models/client/config";
 import { UserPrefs } from "@/store/Auth";
 import convertDateToRelativeTime from "@/utils/relativeTime";
 import slugify from "@/utils/slugify";
+import { normalizeTags } from "@/utils/tags";
 import { IconEdit } from "@tabler/icons-react";
 import Link from "next/link";
 import { Query } from "node-appwrite";
@@ -29,35 +30,34 @@ import { TracingBeam } from "@/components/ui/tracing-beam";
 const Page = async ({ params }: { params: Promise<{ quesId: string; quesName: string }> }) => {
     const { quesId } = await params;
     const [question, answers, upvotes, downvotes, comments] = await Promise.all([
-        databases.getDocument(db, questionCollection, quesId),
-        databases.listDocuments(db, answerCollection, [
+        tablesDB.getRow(db, questionCollection, quesId),
+        tablesDB.listRows(db, answerCollection, [
             Query.orderDesc("$createdAt"),
             Query.equal("questionId", quesId),
         ]),
-        databases.listDocuments(db, voteCollection, [
+        tablesDB.listRows(db, voteCollection, [
             Query.equal("typeId", quesId),
             Query.equal("type", "question"),
             Query.equal("voteStatus", "upvoted"),
             Query.limit(1), // for optimization
         ]),
-        databases.listDocuments(db, voteCollection, [
+        tablesDB.listRows(db, voteCollection, [
             Query.equal("typeId", quesId),
             Query.equal("type", "question"),
             Query.equal("voteStatus", "downvoted"),
             Query.limit(1), // for optimization
         ]),
-        databases.listDocuments(db, commentCollection, [
-            Query.equal("type", "question"),
-            Query.equal("typeId", quesId),
+        tablesDB.listRows(db, commentCollection, [
+            Query.equal("questionId", quesId),
             Query.orderDesc("$createdAt"),
         ]),
     ]);
 
     // since it is dependent on the question, we fetch it here outside of the Promise.all
     const author = await users.get<UserPrefs>(question.authorId);
-    [comments.documents, answers.documents] = await Promise.all([
+    [comments.rows, answers.rows] = await Promise.all([
         Promise.all(
-            comments.documents.map(async comment => {
+            comments.rows.map(async comment => {
                 const author = await users.get<UserPrefs>(comment.authorId);
                 return {
                     ...comment,
@@ -70,21 +70,20 @@ const Page = async ({ params }: { params: Promise<{ quesId: string; quesName: st
             })
         ),
         Promise.all(
-            answers.documents.map(async answer => {
+            answers.rows.map(async answer => {
                 const [author, comments, upvotes, downvotes] = await Promise.all([
                     users.get<UserPrefs>(answer.authorId),
-                    databases.listDocuments(db, commentCollection, [
-                        Query.equal("typeId", answer.$id),
-                        Query.equal("type", "answer"),
+                    tablesDB.listRows(db, commentCollection, [
+                        Query.equal("answerId", answer.$id),
                         Query.orderDesc("$createdAt"),
                     ]),
-                    databases.listDocuments(db, voteCollection, [
+                    tablesDB.listRows(db, voteCollection, [
                         Query.equal("typeId", answer.$id),
                         Query.equal("type", "answer"),
                         Query.equal("voteStatus", "upvoted"),
                         Query.limit(1), // for optimization
                     ]),
-                    databases.listDocuments(db, voteCollection, [
+                    tablesDB.listRows(db, voteCollection, [
                         Query.equal("typeId", answer.$id),
                         Query.equal("type", "answer"),
                         Query.equal("voteStatus", "downvoted"),
@@ -92,8 +91,8 @@ const Page = async ({ params }: { params: Promise<{ quesId: string; quesName: st
                     ]),
                 ]);
 
-                comments.documents = await Promise.all(
-                    comments.documents.map(async comment => {
+                comments.rows = await Promise.all(
+                    comments.rows.map(async comment => {
                         const author = await users.get<UserPrefs>(comment.authorId);
                         return {
                             ...comment,
@@ -120,6 +119,9 @@ const Page = async ({ params }: { params: Promise<{ quesId: string; quesName: st
             })
         ),
     ]);
+
+    const clientAnswers = JSON.parse(JSON.stringify(answers));
+    const clientComments = JSON.parse(JSON.stringify(comments));
 
     return (
         <TracingBeam className="container pl-6">
@@ -157,8 +159,8 @@ const Page = async ({ params }: { params: Promise<{ quesId: string; quesName: st
                             type="question"
                             id={question.$id}
                             className="w-full"
-                            upvotes={upvotes}
-                            downvotes={downvotes}
+                            upvotes={{ total: upvotes.total }}
+                            downvotes={{ total: downvotes.total }}
                         />
                         <EditQuestion
                             questionId={question.$id}
@@ -182,7 +184,7 @@ const Page = async ({ params }: { params: Promise<{ quesId: string; quesName: st
                             />
                         </picture>
                         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-                            {question.tags.map((tag: string) => (
+                            {normalizeTags(question.tags).map((tag: string) => (
                                 <Link
                                     key={tag}
                                     href={`/questions?tag=${tag}`}
@@ -213,7 +215,7 @@ const Page = async ({ params }: { params: Promise<{ quesId: string; quesName: st
                             </div>
                         </div>
                         <Comments
-                            comments={comments}
+                            comments={clientComments}
                             className="mt-4"
                             type="question"
                             typeId={question.$id}
@@ -221,7 +223,7 @@ const Page = async ({ params }: { params: Promise<{ quesId: string; quesName: st
                         <hr className="my-4 border-white/40" />
                     </div>
                 </div>
-                <Answers answers={answers} questionId={question.$id} />
+                <Answers answers={clientAnswers} questionId={question.$id} />
             </div>
         </TracingBeam>
     );

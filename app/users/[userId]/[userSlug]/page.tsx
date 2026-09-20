@@ -1,4 +1,4 @@
-import { databases, users } from "@/models/server/config";
+import { tablesDB, users } from "@/models/server/config";
 import { UserPrefs } from "@/store/Auth";
 import React from "react";
 import { MagicCard, MagicContainer } from "@/components/magicui/magic-card";
@@ -10,11 +10,11 @@ const Page = async ({ params }: { params: Promise<{ userId: string; userSlug: st
     const { userId } = await params;
     const [user, questions, answers] = await Promise.all([
         users.get<UserPrefs>(userId),
-        databases.listDocuments(db, questionCollection, [
+        tablesDB.listRows(db, questionCollection, [
             Query.equal("authorId", userId),
             Query.limit(1), // for optimization
         ]),
-        databases.listDocuments(db, answerCollection, [
+        tablesDB.listRows(db, answerCollection, [
             Query.equal("authorId", userId),
             Query.limit(1), // for optimization
         ]),

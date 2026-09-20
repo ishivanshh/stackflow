@@ -1,25 +1,47 @@
 "use client";
 
-import { ID, Models } from "appwrite";
+import { Models } from "appwrite";
 import React from "react";
 import VoteButtons from "./VoteButtons";
 import { useAuthStore } from "@/store/Auth";
-import { avatars, databases } from "@/models/client/config";
-import { answerCollection, db } from "@/models/name";
+import { avatars } from "@/models/client/config";
 import RTE, { MarkdownPreview } from "./RTE";
 import Comments from "./Comments";
 import slugify from "@/utils/slugify";
 import Link from "next/link";
 import { IconTrash } from "@tabler/icons-react";
 
+type AnswerAuthor = {
+    $id: string;
+    name: string;
+    reputation: number;
+};
+
+type AnswerComment = Models.Row & {
+    authorId: string;
+    content: string;
+    author: AnswerAuthor;
+};
+
+type AnswerRow = Models.Row & {
+    content: string;
+    authorId: string;
+    author: AnswerAuthor;
+    comments: { total: number; rows: AnswerComment[] };
+    upvotesDocuments: { total: number; rows: Models.Row[] };
+    downvotesDocuments: { total: number; rows: Models.Row[] };
+};
+
+type AnswersState = { total: number; rows: AnswerRow[] };
+
 const Answers = ({
     answers: _answers,
     questionId,
 }: {
-    answers: any;
+    answers: AnswersState;
     questionId: string;
 }) => {
-    const [answers, setAnswers] = React.useState(_answers);
+    const [answers, setAnswers] = React.useState<AnswersState>(_answers);
     const [newAnswer, setNewAnswer] = React.useState("");
     const { user } = useAuthStore();
 
@@ -42,30 +64,33 @@ const Answers = ({
             if (!response.ok) throw data;
 
             setNewAnswer(() => "");
-            setAnswers((prev: any) => ({
+            setAnswers(prev => ({
                 total: prev.total + 1,
-                documents: [
+                rows: [
                     {
                         ...data,
                         author: user,
-                        upvotesDocuments: { documents: [], total: 0 },
-                        downvotesDocuments: { documents: [], total: 0 },
-                        comments: { documents: [], total: 0 },
+                        upvotesDocuments: { rows: [], total: 0 },
+                        downvotesDocuments: { rows: [], total: 0 },
+                        comments: { rows: [], total: 0 },
                     },
-                    ...prev.documents,
+                    ...prev.rows,
                 ],
             }));
-        } catch (error: any) {
-            window.alert(error?.message || "Error creating answer");
+        } catch (error: unknown) {
+            window.alert(error instanceof Error ? error.message : "Error creating answer");
         }
     };
 
     const deleteAnswer = async (answerId: string) => {
+        if (!user) return;
+
         try {
             const response = await fetch("/api/answer", {
                 method: "DELETE",
                 body: JSON.stringify({
                     answerId: answerId,
+                    authorId: user.$id,
                 }),
             });
 
@@ -73,19 +98,19 @@ const Answers = ({
 
             if (!response.ok) throw data;
 
-            setAnswers((prev: any) => ({
+            setAnswers(prev => ({
                 total: prev.total - 1,
-                documents: prev.documents.filter((answer: any) => answer.$id !== answerId),
+                rows: prev.rows.filter(answer => answer.$id !== answerId),
             }));
-        } catch (error: any) {
-            window.alert(error?.message || "Error deleting answer");
+        } catch (error: unknown) {
+            window.alert(error instanceof Error ? error.message : "Error deleting answer");
         }
     };
 
     return (
         <>
             <h2 className="mb-4 text-xl">{answers.total} Answers</h2>
-            {answers.documents.map((answer: any) => (
+            {answers.rows.map(answer => (
                 <div key={answer.$id} className="flex gap-4">
                     <div className="flex shrink-0 flex-col items-center gap-4">
                         <VoteButtons

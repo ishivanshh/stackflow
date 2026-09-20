@@ -1,6 +1,6 @@
 import Pagination from "@/components/Pagination";
 import { answerCollection, db, questionCollection, voteCollection } from "@/models/name";
-import { databases } from "@/models/server/config";
+import { tablesDB } from "@/models/server/config";
 import convertDateToRelativeTime from "@/utils/relativeTime";
 import slugify from "@/utils/slugify";
 import Link from "next/link";
@@ -27,15 +27,13 @@ const Page = async ({
 
     if (currentParams.voteStatus) query.push(Query.equal("voteStatus", currentParams.voteStatus));
 
-    const votes = await databases.listDocuments(db, voteCollection, query);
+    const votes = await tablesDB.listRows(db, voteCollection, query);
 
-    votes.documents = await Promise.all(
-        votes.documents.map(async vote => {
+    votes.rows = await Promise.all(
+        votes.rows.map(async vote => {
             const questionOfTypeQuestion =
                 vote.type === "question"
-                    ? await databases.getDocument(db, questionCollection, vote.typeId, [
-                          Query.select(["title"]),
-                      ])
+                    ? await tablesDB.getRow(db, questionCollection, vote.typeId)
                     : null;
 
             if (questionOfTypeQuestion) {
@@ -45,12 +43,11 @@ const Page = async ({
                 };
             }
 
-            const answer = await databases.getDocument(db, answerCollection, vote.typeId);
-            const questionOfTypeAnswer = await databases.getDocument(
+            const answer = await tablesDB.getRow(db, answerCollection, vote.typeId);
+            const questionOfTypeAnswer = await tablesDB.getRow(
                 db,
                 questionCollection,
-                answer.questionId,
-                [Query.select(["title"])]
+                answer.questionId
             );
 
             return {
@@ -102,7 +99,7 @@ const Page = async ({
                 </ul>
             </div>
             <div className="mb-4 max-w-3xl space-y-6">
-                {votes.documents.map(vote => (
+                {votes.rows.map(vote => (
                     <div
                         key={vote.$id}
                         className="rounded-xl border border-white/40 p-4 duration-200 hover:bg-white/10"
