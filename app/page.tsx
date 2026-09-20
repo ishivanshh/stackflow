@@ -1,6 +1,7 @@
 'use client';
 
 import { Inter, Space_Grotesk } from "next/font/google";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", weight: ["400", "500", "600"] });
 
@@ -14,13 +15,17 @@ export default function Page() {
   return (
     <div className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <nav className="nav">
-        <div className="brand">
+        <Link className="brand" href="/">
           <span className="brand-dot" />
           StackFlow
-        </div>
+        </Link>
         <div className="nav-actions">
-          <button className="btn btn-ghost">Log in</button>
-          <button className="btn btn-solid">Sign up</button>
+          <Link className="btn btn-ghost" href="/login">
+            Log in
+          </Link>
+          <Link className="btn btn-solid" href="/register">
+            Sign up
+          </Link>
         </div>
       </nav>
 
@@ -40,13 +45,17 @@ export default function Page() {
             people who&apos;ve solved it before — no forums to dig through, no threads to lose track of.
           </p>
           <div className="hero-cta">
-            <button className="btn btn-solid btn-lg">Ask a question</button>
-            <button className="btn btn-ghost btn-lg">Browse questions</button>
+            <Link className="btn btn-solid btn-lg" href="/questions/ask">
+              Ask a question
+            </Link>
+            <Link className="btn btn-ghost btn-lg" href="/questions">
+              Browse questions
+            </Link>
           </div>
         </div>
 
         <div className="stack">
-          <div className="qcard">
+          <Link className="qcard" href="/questions?search=useEffect">
             <p className="qcard-title">Why does useEffect run twice in React 18 dev mode?</p>
             <div className="qcard-meta">
               <span className="qcard-tag">react</span>
@@ -55,8 +64,8 @@ export default function Page() {
                 Answered
               </span>
             </div>
-          </div>
-          <div className="qcard">
+          </Link>
+          <Link className="qcard" href="/questions?search=JSONB">
             <p className="qcard-title">Best way to index a JSONB column in PostgreSQL?</p>
             <div className="qcard-meta">
               <span className="qcard-tag">postgresql</span>
@@ -65,14 +74,14 @@ export default function Page() {
                 Answered
               </span>
             </div>
-          </div>
-          <div className="qcard">
+          </Link>
+          <Link className="qcard" href="/questions?search=Docker">
             <p className="qcard-title">Docker container can&apos;t reach host on Mac — fix?</p>
             <div className="qcard-meta">
               <span className="qcard-tag">docker</span>
               <span style={{ color: "var(--text-dim)", fontWeight: 500 }}>3 answers</span>
             </div>
-          </div>
+          </Link>
         </div>
       </section>
 
@@ -163,6 +172,7 @@ export default function Page() {
           display: flex;
           align-items: center;
           gap: 8px;
+          text-decoration: none;
         }
         .brand-dot {
           width: 9px;
@@ -290,6 +300,12 @@ export default function Page() {
           opacity: 0;
           transform: translateY(24px);
           animation: cardIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+          text-decoration: none;
+          transition: border-color 0.15s ease, transform 0.15s ease;
+        }
+        .qcard:hover {
+          border-color: var(--teal);
+          transform: translateY(-3px);
         }
         .qcard:nth-child(1) {
           top: 0;

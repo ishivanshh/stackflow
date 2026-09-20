@@ -63,7 +63,26 @@ export const useAuthStore = create<IAuthStore>()(
 
         async login(email: string , password: string ) {
             try {
-                const session = await account.createEmailPasswordSession(email , password )
+                let session: Models.Session;
+
+                try {
+                    const currentSession = await account.getSession("current");
+                    const currentUser = await account.get<UserPrefs>();
+
+                    if (currentUser.email === email) {
+                        session = currentSession;
+                    } else {
+                        await account.deleteSession("current");
+                        session = await account.createEmailPasswordSession(email, password);
+                    }
+                } catch (error) {
+                    if (error instanceof AppwriteException && error.code !== 401) {
+                        throw error;
+                    }
+
+                    session = await account.createEmailPasswordSession(email, password);
+                }
+
                 const [user , {jwt} ] = await Promise.all([
                     account.get<UserPrefs>(),
                     account.createJWT()
