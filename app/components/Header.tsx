@@ -23,6 +23,7 @@ export default function Header() {
     ];
 
     if (user)
+    {
         navItems.push({
             name: "Profile",
             link: `/users/${user.$id}/${slugify(user.name)}`,
@@ -33,16 +34,25 @@ export default function Header() {
             link: `/blogs`,
             icon: <IconMessage className="h-4 w-4 text-neutral-500 dark:text-white" />,
         });
+    }
 
     return (
         <div className="relative w-full">
             <Link
                 href="/"
-                className="relative left-6 top-10 z-50 flex h-10 items-center text-lg font-semibold tracking-[0.2em] text-white"
+                className="fixed left-6 top-10 z-50 flex h-10 items-center text-lg font-semibold tracking-[0.2em] text-white"
             >
                 YOURSPACE
             </Link>
             <FloatingNav navItems={navItems} />
+            {user && (
+                <Link
+                    href="/feedback"
+                    className="fixed right-6 top-10 z-50 flex h-10 items-center gap-2 rounded-full border border-white/15 bg-black px-4 text-sm font-medium text-white shadow-lg transition hover:border-orange-400 hover:text-orange-300"
+                >
+                    Feedback
+                </Link>
+            )}
         </div>
     );
 }
