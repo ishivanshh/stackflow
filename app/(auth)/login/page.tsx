@@ -13,6 +13,8 @@ function LoginPage() {
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState("");
     const [formData, setFormData] = React.useState({ email: "", password: "" });
+    const next = searchParams.get("next");
+    const registerHref = next ? `/register?next=${encodeURIComponent(next)}` : "/register";
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData((current) => ({
@@ -36,7 +38,11 @@ function LoginPage() {
         if(loginResponse.error){
             setError(loginResponse.error.message);
         } else {
-            router.replace(searchParams.get("next") || "/questions/ask");
+            const next = searchParams.get("next");
+            const destination = next?.startsWith("/") && !next.startsWith("//")
+                ? next
+                : "/questions/ask";
+            router.replace(destination);
         }
 
         setIsLoading(false);
@@ -76,7 +82,7 @@ function LoginPage() {
 
                     <p className="mt-6 text-center text-sm text-zinc-500">
                         Don&apos;t have an account?{" "}
-                        <Link href="/register" className="font-medium text-white transition hover:text-zinc-300">Create account</Link>
+                        <Link href={registerHref} className="font-medium text-white transition hover:text-zinc-300">Create account</Link>
                     </p>
                 </div>
             </div>

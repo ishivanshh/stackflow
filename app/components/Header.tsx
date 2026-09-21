@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Link from "next/link";
 import { FloatingNav } from "@/components/ui/floating-navbar";
 import { IconHome, IconMessage, IconWorldQuestion } from "@tabler/icons-react";
 import { useAuthStore } from "@/store/Auth";
@@ -27,9 +28,20 @@ export default function Header() {
             link: `/users/${user.$id}/${slugify(user.name)}`,
             icon: <IconMessage className="h-4 w-4 text-neutral-500 dark:text-white" />,
         });
+        navItems.push({
+            name: "Blogs",
+            link: `/blogs`,
+            icon: <IconMessage className="h-4 w-4 text-neutral-500 dark:text-white" />,
+        });
 
     return (
         <div className="relative w-full">
+            <Link
+                href="/"
+                className="relative left-6 top-10 z-50 flex h-10 items-center text-lg font-semibold tracking-[0.2em] text-white"
+            >
+                YOURSPACE
+            </Link>
             <FloatingNav navItems={navItems} />
         </div>
     );

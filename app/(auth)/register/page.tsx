@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import React from "react";
 import { useAuthStore } from "@/store/Auth";
 import { Meteors } from "@/components/ui/meteors"
@@ -9,6 +10,7 @@ import { Meteors } from "@/components/ui/meteors"
 function RegisterPage(){
     const { createAccount, login } = useAuthStore();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState("");
     const [formData, setFormData] = React.useState({
@@ -54,7 +56,11 @@ function RegisterPage(){
             if(loginResponse.error){
                 setError(loginResponse.error!.message)
             } else {
-                router.replace("/questions/ask");
+                const next = searchParams.get("next");
+                const destination = next?.startsWith("/") && !next.startsWith("//")
+                    ? next
+                    : "/questions/ask";
+                router.replace(destination);
             }
         }
 

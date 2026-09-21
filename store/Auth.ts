@@ -53,10 +53,13 @@ export const useAuthStore = create<IAuthStore>()(
         async VerifySession() {
             try {
                 const session = await account.getSession("current")
-                set({session})
-                
-            } catch (error) {
-                console.log(error)
+                const [user, { jwt }] = await Promise.all([
+                    account.get<UserPrefs>(),
+                    account.createJWT(),
+                ]);
+                set({ session, user, jwt })
+            } catch {
+                set({ session: null, user: null, jwt: null })
             }
         },
 
@@ -125,10 +128,10 @@ export const useAuthStore = create<IAuthStore>()(
         async logout(){
             try {
                 await account.deleteSession("current");
+            } catch {
+                // Clear local auth even when the remote session is already expired.
+            } finally {
                 set({ session : null , jwt : null , user : null })
-                
-            } catch (error) {
-                console.log(error);
             }
         }
 

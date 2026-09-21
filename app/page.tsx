@@ -4,16 +4,13 @@ import LatestQuestions from "./components/LatestQuestions";
 import Footer from "./components/Footer";
 import { AnimatedList } from "@/components/ui/animated-list";
 import { cn } from "@/lib/utils";
-import {
-  AnimatedSpan,
-  Terminal,
-  TypingAnimation,
+import {AnimatedSpan,Terminal,TypingAnimation,
 } from "@/components/ui/terminal";
-import {
-  ScrollVelocityContainer,
-  ScrollVelocityRow,
-} from "@/components/ui/scroll-based-velocity";
+import {ScrollVelocityContainer,ScrollVelocityRow} from "@/components/ui/scroll-based-velocity";
 import { MorphingText } from "@/components/ui/morphing-text"
+import { DiaTextReveal } from "@/components/ui/dia-text-reveal"
+
+
 
 const joinedUsers = [
   { name: "Shivansh Saxena", time: "just now", icon: "👤", color: "#00C9A7" },
