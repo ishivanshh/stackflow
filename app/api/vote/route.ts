@@ -1,10 +1,8 @@
-import { Query } from "node-appwrite";
+import { ID, Query } from "node-appwrite";
 import { NextRequest, NextResponse } from "next/server";
 
 import { db, answerCollection, questionCollection, voteCollection } from "@/models/name";
 import { tablesDB } from "@/models/server/config";
-
-const REPUTATION_CHANGE = 10;
 
 export async function POST(request: NextRequest) {
 
@@ -61,13 +59,11 @@ export async function POST(request: NextRequest) {
                 : answerCollection;
 
         // Find the question or answer
-        const targetResponse = await tablesDB.getRow(
+        await tablesDB.getRow(
             db,
             targetCollection,
             typeId
         );
-
-        const target = targetResponse as any;
 
         // Find existing vote
         const response = await tablesDB.listRows(
@@ -80,28 +76,13 @@ export async function POST(request: NextRequest) {
             ]
         );
 
-        const existingVote = response.rows[0] as any;
+        const existingVote = response.rows[0] as unknown as {
+            $id: string;
+            voteStatus: "upvoted" | "downvoted";
+        } | undefined;
 
-        // Same vote means remove the vote and reverse its reputation effect
+        // Same vote means remove the vote.
         if (existingVote && existingVote.voteStatus === voteStatus) {
-
-            const reputationChange =
-                voteStatus === "upvoted"
-                    ? -REPUTATION_CHANGE
-                    : REPUTATION_CHANGE;
-
-            await tablesDB.updateRow(
-                db,
-                targetCollection,
-                typeId,
-                {
-                    reputation: Math.max(
-                        0,
-                        (target.reputation || 0) + reputationChange
-                    )
-                }
-            );
-
             await tablesDB.deleteRow(
                 db,
                 voteCollection,
@@ -110,11 +91,7 @@ export async function POST(request: NextRequest) {
 
             return NextResponse.json(
                 {
-                    message: "Vote removed",
-                    reputation: Math.max(
-                        0,
-                        (target.reputation || 0) + reputationChange
-                    )
+                    message: "Vote removed"
                 },
                 {
                     status: 200
@@ -122,34 +99,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Different vote means change the vote and reverse the old effect
+        // Different vote means switch the existing vote.
         if (existingVote) {
-
-            const oldReputationChange =
-                existingVote.voteStatus === "upvoted"
-                    ? -REPUTATION_CHANGE
-                    : REPUTATION_CHANGE;
-
-            const newReputationChange =
-                voteStatus === "upvoted"
-                    ? REPUTATION_CHANGE
-                    : -REPUTATION_CHANGE;
-
-            const reputationChange =
-                oldReputationChange + newReputationChange;
-
-            const updatedTarget = await tablesDB.updateRow(
-                db,
-                targetCollection,
-                typeId,
-                {
-                    reputation: Math.max(
-                        0,
-                        (target.reputation || 0) + reputationChange
-                    )
-                }
-            );
-
             const updatedVote = await tablesDB.updateRow(
                 db,
                 voteCollection,
@@ -161,8 +112,7 @@ export async function POST(request: NextRequest) {
 
             return NextResponse.json(
                 {
-                    vote: updatedVote,
-                    reputation: (updatedTarget as any).reputation
+                    vote: updatedVote
                 },
                 {
                     status: 200
@@ -170,30 +120,11 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // New upvote increases reputation
-        // New downvote decreases reputation
-        const reputationChange =
-            voteStatus === "upvoted"
-                ? REPUTATION_CHANGE
-                : -REPUTATION_CHANGE;
-
-        const updatedTarget = await tablesDB.updateRow(
-            db,
-            targetCollection,
-            typeId,
-            {
-                reputation: Math.max(
-                    0,
-                    (target.reputation || 0) + reputationChange
-                )
-            }
-        );
-
         // Create new vote
         const newVote = await tablesDB.createRow(
             db,
             voteCollection,
-            crypto.randomUUID(),
+            ID.unique(),
             {
                 type,
                 typeId,
@@ -204,24 +135,30 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json(
             {
-                vote: newVote,
-                reputation: (updatedTarget as any).reputation
+                vote: newVote
             },
             {
                 status: 201
             }
         );
 
-    } catch (error: any) {
+    } catch (error: unknown) {
 
         console.error("Error handling vote:", error);
 
+        const message = error instanceof Error ? error.message : "Error handling vote";
+        const statusCode =
+            typeof error === "object" && error !== null && "code" in error &&
+            typeof error.code === "number"
+                ? error.code
+                : 500;
+
         return NextResponse.json(
             {
-                error: error?.message || "Error handling vote"
+                error: message
             },
             {
-                status: error?.code || 500
+                status: statusCode
             }
         );
     }

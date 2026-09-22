@@ -8,6 +8,7 @@ import QuestionCard from "@/components/QuestionCard";
 import { UserPrefs } from "@/store/Auth";
 import Pagination from "@/components/Pagination";
 import Search from "./Search";
+import QuestionsSidebar from "./QuestionsSidebar";
 
 const Page = async ({
     searchParams,
@@ -19,8 +20,8 @@ const Page = async ({
 
     const queries = [
         Query.orderDesc("$createdAt"),
-        Query.offset((+params.page - 1) * 25),
-        Query.limit(25),
+        Query.offset((+params.page - 1) * 5),
+        Query.limit(5),
     ];
 
     if (params.tag) queries.push(Query.equal("tags", params.tag));
@@ -81,12 +82,17 @@ const Page = async ({
             <div className="mb-4">
                 <p>{questions.total} questions</p>
             </div>
-            <div className="mb-4 max-w-3xl space-y-6">
-                    {questions.rows.map(ques => (
-                        <QuestionCard key={ques.$id} ques={JSON.parse(JSON.stringify(ques))} />
-                ))}
+            <div className="grid gap-3 lg:grid-cols-2">
+                <div>
+                    <div className="mb-4 max-w-3xl space-y-6">
+                        {questions.rows.map(ques => (
+                            <QuestionCard key={ques.$id} ques={JSON.parse(JSON.stringify(ques))} />
+                        ))}
+                    </div>
+                    <Pagination total={questions.total} limit={5} />
+                </div>
+                <QuestionsSidebar />
             </div>
-            <Pagination total={questions.total} limit={25} />
         </div>
     );
 };
