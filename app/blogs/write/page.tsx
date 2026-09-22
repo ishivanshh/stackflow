@@ -9,7 +9,7 @@ import { useAuthStore } from "@/store/Auth";
 import Footer from "@/app/components/Footer";
 import { ID } from "appwrite";
 import { storage } from "@/models/client/config";
-import { blogCoverBucket } from "@/models/name";
+import { attachmentBucket } from "@/models/name";
 
 const inputClassName =
     "w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition placeholder:text-neutral-600 focus:border-orange-400/70 focus:ring-2 focus:ring-orange-400/10";
@@ -44,8 +44,19 @@ export default function WriteBlogPage() {
         try {
             let coverImage = "";
             if (coverFile) {
-                const uploadedFile = await storage.createFile(blogCoverBucket, ID.unique(), coverFile);
-                coverImage = storage.getFileView(blogCoverBucket, uploadedFile.$id).toString();
+                const storageSetup = await fetch("/api/storage/ensure", {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${jwt}`,
+                    },
+                });
+                if (!storageSetup.ok) {
+                    const setupError = await storageSetup.json();
+                    throw new Error(setupError.error || "Unable to prepare image storage");
+                }
+
+                const uploadedFile = await storage.createFile(attachmentBucket, ID.unique(), coverFile);
+                coverImage = storage.getFileView(attachmentBucket, uploadedFile.$id).toString();
             }
 
             const response = await fetch("/api/blogs", {

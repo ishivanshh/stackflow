@@ -1,36 +1,60 @@
 import { Permission } from "node-appwrite";
 import { storage } from "./config";
-import { questionAttachmentBucket } from "../name";
+import { attachmentBucket } from "../name";
 
-export default async function getOrCreateStorageBucket() {
+let setupPromise: Promise<void> | null = null;
+
+async function ensureBucket(bucketId: string) {
+  const permissions = [
+    Permission.create("users"),
+    Permission.read("any"),
+    Permission.update("users"),
+    Permission.delete("users"),
+  ];
+
   try {
-    // Check if bucket already exists
-    await storage.getBucket(questionAttachmentBucket);
-
-    console.log("Storage bucket already exists");
-    console.log("Storage connected");
-  } catch (error) {
-    try {
-      // Create bucket if it doesn't exist
-      await storage.createBucket(
-        questionAttachmentBucket,
-        questionAttachmentBucket,
-        [
-          Permission.create("users"),
-          Permission.read("any"),
-          Permission.update("users"),
-          Permission.delete("users"),
-        ],
-        false,
-        undefined,
-        undefined,
-        ["jpg", "png", "jpeg", "webp", "gif", "heic"],
-      );
-
-      console.log("Storage bucket created");
-      console.log("Storage connected");
-    } catch (error) {
-      console.log("Error creating storage bucket:", error);
+    const bucket = await storage.getBucket(bucketId);
+    await storage.updateBucket(bucketId, bucket.name, permissions);
+    return;
+  } catch (error: unknown) {
+    if (
+      typeof error !== "object" ||
+      error === null ||
+      !("code" in error) ||
+      error.code !== 404
+    ) {
+      throw error;
     }
   }
+
+  try {
+    await storage.createBucket(
+      bucketId,
+      bucketId,
+      permissions,
+      false,
+      undefined,
+      undefined,
+      ["jpg", "png", "jpeg", "webp", "gif", "heic"],
+    );
+    console.log(`Storage bucket created: ${bucketId}`);
+  } catch (error: unknown) {
+    if (
+      typeof error !== "object" ||
+      error === null ||
+      !("code" in error) ||
+      error.code !== 409
+    ) {
+      throw error;
+    }
+  }
+}
+
+async function setupStorageBuckets() {
+  await ensureBucket(attachmentBucket);
+}
+
+export default function getOrCreateStorageBuckets() {
+  setupPromise ??= setupStorageBuckets();
+  return setupPromise;
 }

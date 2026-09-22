@@ -17,7 +17,7 @@ import React from "react";
 import { tablesDB, storage } from "@/models/client/config";
 import {
     db,
-    questionAttachmentBucket,
+    attachmentBucket,
     questionCollection,
 } from "@/models/name";
 
@@ -146,8 +146,19 @@ const QuestionForm = ({
         }
 
         // Upload attachment
+        const storageSetup = await fetch("/api/storage/ensure", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${useAuthStore.getState().jwt}`,
+            },
+        });
+        if (!storageSetup.ok) {
+            const setupError = await storageSetup.json();
+            throw new Error(setupError.error || "Unable to prepare image storage");
+        }
+
         const storageResponse = await storage.createFile(
-            questionAttachmentBucket,
+            attachmentBucket,
             ID.unique(),
             formData.attachment
         );
@@ -192,14 +203,25 @@ const QuestionForm = ({
             // Delete old attachment
             if (question.attachmentId) {
                 await storage.deleteFile(
-                    questionAttachmentBucket,
+                    attachmentBucket,
                     question.attachmentId
                 );
             }
 
+
+            const storageSetup = await fetch("/api/storage/ensure", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${useAuthStore.getState().jwt}`,
+                },
+            });
+            if (!storageSetup.ok) {
+                const setupError = await storageSetup.json();
+                throw new Error(setupError.error || "Unable to prepare image storage");
+            }
             // Upload new attachment
             const file = await storage.createFile(
-                questionAttachmentBucket,
+                attachmentBucket,
                 ID.unique(),
                 formData.attachment
             );
@@ -266,10 +288,10 @@ const QuestionForm = ({
                 )}`
             );
 
-        } catch (error: any) {
+        } catch (error: unknown) {
 
             setError(
-                error?.message ||
+                error instanceof Error ? error.message :
                 "Something went wrong"
             );
 

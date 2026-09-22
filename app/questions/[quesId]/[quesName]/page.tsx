@@ -11,15 +11,13 @@ import {
     voteCollection,
     questionCollection,
     commentCollection,
-    questionAttachmentBucket,
 } from "@/models/name";
 import { tablesDB, users } from "@/models/server/config";
-import { storage } from "@/models/client/config";
+import { getAttachmentPreviewUrl } from "@/utils/attachmentUrl";
 import { UserPrefs } from "@/store/Auth";
 import convertDateToRelativeTime from "@/utils/relativeTime";
 import slugify from "@/utils/slugify";
 import { normalizeTags } from "@/utils/tags";
-import { IconEdit } from "@tabler/icons-react";
 import Link from "next/link";
 import { Query } from "node-appwrite";
 import React from "react";
@@ -171,18 +169,15 @@ const Page = async ({ params }: { params: Promise<{ quesId: string; quesName: st
                     </div>
                     <div className="w-full overflow-auto">
                         <MarkdownPreview className="rounded-xl p-4" source={question.content} />
-                        <picture>
-                            <img
-                                src={
-                                    storage.getFilePreview(
-                                        questionAttachmentBucket,
-                                        question.attachmentId
-                                    )
-                                }
-                                alt={question.title}
-                                className="mt-3 rounded-lg"
-                            />
-                        </picture>
+                        {question.attachmentId && (
+                            <picture>
+                                <img
+                                    src={getAttachmentPreviewUrl(String(question.attachmentId))}
+                                    alt={question.title}
+                                    className="mt-3 max-h-[600px] w-full rounded-lg object-contain"
+                                />
+                            </picture>
+                        )}
                         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
                             {normalizeTags(question.tags).map((tag: string) => (
                                 <Link

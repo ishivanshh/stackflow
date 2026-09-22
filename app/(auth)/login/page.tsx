@@ -50,7 +50,7 @@ function LoginPage() {
 
     return (
         <main className="flex min-h-screen items-center justify-center bg-black px-4 py-28 text-white">
-            <Meteors number={50} />
+            <Meteors number={100} />
             <div className="w-full max-w-md">
                 <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-8 shadow-2xl">
                     <div className="mb-8 text-center">

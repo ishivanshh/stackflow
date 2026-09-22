@@ -5,6 +5,7 @@ import createQuestionTable from "./question.collection";
 import createCommentTable from "./comment.collection";
 import createVoteTable from "./vote.collection";
 import createBlogTable from "./blog.collection";
+import createStorageBuckets from "./storage.collection";
 
 import { tablesDB } from "./config";
 
@@ -59,6 +60,7 @@ export default async function getOrCreateDb() {
             createCommentTable(),
             createVoteTable(),
             createBlogTable(),
+            createStorageBuckets(),
         ]);
 
         console.log("All tables connected");

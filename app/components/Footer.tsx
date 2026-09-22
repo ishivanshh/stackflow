@@ -48,7 +48,7 @@ export default function Footer() {
           <div className="grid gap-10 md:grid-cols-2 md:items-center">
             <div>
               <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
-                Codeflow is built by the people who use it
+                Yourspace is built by people like you.
               </h2>
               <p className="mt-4 max-w-md text-[15px] leading-relaxed text-neutral-400">
                 Every answered question, fixed bug, and reviewed pull request comes
@@ -100,7 +100,7 @@ export default function Footer() {
         <div className="mt-24 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Link href="/" className="text-xl font-bold text-white">
-              Code<span className="text-orange-500">flow</span>
+              YOUR<span className="text-orange-500">SPACE</span>
             </Link>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-neutral-500">
               A question board for developers who&apos;d rather explain it once,
@@ -141,7 +141,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-neutral-600">
-            © {new Date().getFullYear()} Codeflow. Open source under MIT.
+            © {new Date().getFullYear()} YOURSPACE. Write whatever you want.
           </p>
           <div className="flex gap-6 text-sm">
             <a href="mailto:hello@codeflow.dev?subject=Privacy%20question" className="text-neutral-500 hover:text-orange-500">
@@ -151,10 +151,10 @@ export default function Footer() {
               Terms
             </a>
             <a
-              href="mailto:hello@codeflow.dev"
+              href="mailto:shivanshsaxena248@gmail.com"
               className="text-neutral-500 hover:text-orange-500"
             >
-              hello@codeflow.dev
+              Mail
             </a>
           </div>
         </div>
